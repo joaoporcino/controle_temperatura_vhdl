@@ -11,13 +11,11 @@ entity controle_temperatura is
         temp_ext_max : in STD_LOGIC_VECTOR(6 downto 0);
 
         -- Saídas Visuais (LEDs de Estado)
-        led_heat   : out STD_LOGIC;
-        led_cool   : out STD_LOGIC;
-        led_stable : out STD_LOGIC;
-        led_alert  : out STD_LOGIC;
+        states_out : out STD_LOGIC_VECTOR (6 downto 0);
         
         motor_pow_c : out STD_LOGIC; -- Sinal de força para Resfriar
         motor_pow_h : out STD_LOGIC; -- Sinal de força para Aquecer
+		  led_alert   : out STD_LOGIC;
         
         -- Displays
         hex0       : out STD_LOGIC_VECTOR(6 downto 0);
@@ -38,7 +36,8 @@ architecture Structural of controle_temperatura is
         enab_max_min : out STD_LOGIC;
         enab_ext_int : out STD_LOGIC;
         enab_pow : out STD_LOGIC;
-        states_out : out STD_LOGIC_VECTOR (3 downto 0)
+		  led_alert : out STD_LOGIC;
+        states_out : out STD_LOGIC_VECTOR (6 downto 0)
 		); 
 	 end component;
 		
@@ -48,15 +47,15 @@ architecture Structural of controle_temperatura is
         rst      : in  STD_LOGIC;
         temp_int_min : in STD_LOGIC_VECTOR(6 downto 0);
         temp_ext_max : in STD_LOGIC_VECTOR(6 downto 0);
-        enab_max-min: in STD_LOGIC;
-        enab_ext-int : in STD_LOGIC;
+        enab_max_min: in STD_LOGIC;
+        enab_ext_int : in STD_LOGIC;
         enab_pow : in STD_LOGIC;
         c : out STD_LOGIC;
         h : out STD_LOGIC;
         s : out STD_LOGIC;
         pow_c : out STD_LOGIC; 
         pow_h : out STD_LOGIC; 
-		ctrl :  out STD_LOGIC;
+		  ctrl :  out STD_LOGIC;
         alert     : out STD_LOGIC;
         hex0      : out STD_LOGIC_VECTOR(6 downto 0);
         hex1      : out STD_LOGIC_VECTOR(6 downto 0)
@@ -64,9 +63,9 @@ architecture Structural of controle_temperatura is
 	end component;
 	 
     -- Fios de Controle
-    signal w_enab_max, w_enab_min : STD_LOGIC;
-    signal w_enab_ext, w_enab_int : STD_LOGIC;
-    signal w_enab_pow, w_enab_flags : STD_LOGIC;
+    signal w_enab_max_min : STD_LOGIC;
+    signal w_enab_ext_int : STD_LOGIC;
+    signal w_enab_pow: STD_LOGIC;
 	signal CTRL_CONC : STD_LOGIC;
 
     -- Fios de Flags
@@ -85,7 +84,7 @@ begin
             enab_max_min  => w_enab_max_min,
             enab_ext_int  => w_enab_ext_int,
             enab_pow   => w_enab_pow,
-            states_out : out STD_LOGIC_VECTOR (3 downto 0)
+            states_out => states_out
         );
 
     U_DATAPATH: entity work.datapath
@@ -103,10 +102,10 @@ begin
 
             pow_c        => motor_pow_c, 
             pow_h        => motor_pow_h,
-			ctrl         => CTRL_CONC,
+			   ctrl         => CTRL_CONC,
 
             
-            alert        => led_alert,
+            alert    => led_alert,
             hex0         => hex0,
             hex1         => hex1
         );

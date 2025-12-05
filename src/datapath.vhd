@@ -8,15 +8,15 @@ entity datapath is
         rst      : in  STD_LOGIC;
         temp_int_min : in STD_LOGIC_VECTOR(6 downto 0);
         temp_ext_max : in STD_LOGIC_VECTOR(6 downto 0);
-        enab_max-min: in STD_LOGIC;
-        enab_ext-int : in STD_LOGIC;
+        enab_max_min: in STD_LOGIC;
+        enab_ext_int : in STD_LOGIC;
         enab_pow : in STD_LOGIC; 
         c : out STD_LOGIC;
         h : out STD_LOGIC;
         s : out STD_LOGIC;
         pow_c : out STD_LOGIC; 
         pow_h : out STD_LOGIC; 
-		ctrl  : out STD_LOGIC;
+		  ctrl  : out STD_LOGIC;
         alert     : out STD_LOGIC;
         hex0      : out STD_LOGIC_VECTOR(6 downto 0);
         hex1      : out STD_LOGIC_VECTOR(6 downto 0)
@@ -43,8 +43,10 @@ architecture Structural of datapath is
     end component;
 
     component comparador_7bits is 
-        Port ( enab : in STD_LOGIC; int, max : in STD_LOGIC_VECTOR(6 downto 0); c : out STD_LOGIC );
-    end component;
+		Port ( enab : in STD_LOGIC; A : in STD_LOGIC_VECTOR(6 downto 0);
+				  B : in STD_LOGIC_VECTOR(6 downto 0); O : out STD_LOGIC
+			 );    
+	 end component;
     
     component comparadorAlerta is
         Port ( enab : in STD_LOGIC; val : in STD_LOGIC_VECTOR(6 downto 0); alerta : out STD_LOGIC );
@@ -53,6 +55,7 @@ architecture Structural of datapath is
     component status_decoder is
         Port (
             enable, h_in, c_in : in  STD_LOGIC;
+				power_final        : in  STD_LOGIC_VECTOR(6 downto 0);
             power_sign_bit     : in  STD_LOGIC;
             s_out              : out STD_LOGIC;
             pow_c, pow_h       : out STD_LOGIC
@@ -69,6 +72,14 @@ architecture Structural of datapath is
 
     component decodificador_7seg is
         Port ( nibble : in STD_LOGIC_VECTOR (3 downto 0); seg : out STD_LOGIC_VECTOR (6 downto 0));
+    end component;
+
+    component bin_to_bcd is
+        Port (
+            bin_in  : in  STD_LOGIC_VECTOR(6 downto 0);
+            dezena  : out STD_LOGIC_VECTOR(3 downto 0);
+            unidade : out STD_LOGIC_VECTOR(3 downto 0)
+        );
     end component;
 
     -- Sinais Internos
@@ -91,19 +102,20 @@ architecture Structural of datapath is
     
     signal power_final    : STD_LOGIC_VECTOR(6 downto 0); 
     signal h_internal, c_internal : STD_LOGIC;
-    signal upper_nibble : STD_LOGIC_VECTOR(3 downto 0);
+    signal bcd_dezena : STD_LOGIC_VECTOR(3 downto 0);
+    signal bcd_unidade : STD_LOGIC_VECTOR(3 downto 0);
 
 begin
-
+		
     -- 1. Registradores
-    R_INT: registrador port map (clk=>clk, rst=>rst, en=>enab_ext-int, d_in=>temp_int_min, q_out=>reg_temp_int);
-    R_MIN: registrador port map (clk=>clk, rst=>rst, en=>enab_max-min, d_in=>temp_int_min, q_out=>reg_temp_min);
-    R_EXT: registrador port map (clk=>clk, rst=>rst, en=>enab_ext-int, d_in=>temp_ext_max, q_out=>reg_temp_ext);
-    R_MAX: registrador port map (clk=>clk, rst=>rst, en=>enab_max-min, d_in=>temp_ext_max, q_out=>reg_temp_max);
+    R_INT: registrador port map (clk=>clk, rst=>rst, en=>enab_ext_int, d_in=>temp_int_min, q_out=>reg_temp_int);
+    R_MIN: registrador port map (clk=>clk, rst=>rst, en=>enab_max_min, d_in=>temp_int_min, q_out=>reg_temp_min);
+    R_EXT: registrador port map (clk=>clk, rst=>rst, en=>enab_ext_int, d_in=>temp_ext_max, q_out=>reg_temp_ext);
+    R_MAX: registrador port map (clk=>clk, rst=>rst, en=>enab_max_min, d_in=>temp_ext_max, q_out=>reg_temp_max);
 
     -- 2. Comparadores
-    COMP_H: comparador_7bits port map (enab => enab_pow, A => reg_temp_min, B => reg_temp_int, out => h_internal);
-    COMP_C: comparador_7bits port map (enab => enab_pow, A => reg_temp_int, B => reg_temp_max, out => c_internal);
+    COMP_H: comparador_7bits port map (enab => enab_pow, A => reg_temp_min, B => reg_temp_int, O => h_internal);
+    COMP_C: comparador_7bits port map (enab => enab_pow,  A=> reg_temp_int, B => reg_temp_max, O => c_internal);
 	 
 	 
     U_CONTROL_DEC: control_decoder port map ( reset => rst, not_reset => ctrl);
@@ -133,6 +145,7 @@ begin
             enable         => enab_pow,
             h_in           => h_internal,
             c_in           => c_internal,
+				power_final    => power_final,
             power_sign_bit => power_calc_raw(8),
             s_out          => s,
             pow_c          => pow_c,
@@ -156,8 +169,16 @@ begin
     U_ALERT: comparadorAlerta 
         port map (enab => enab_pow, val => power_final, alerta => alert);
 
-    U_HEX0: decodificador_7seg port map (nibble => power_final(3 downto 0), seg => hex0);
-    upper_nibble <= '0' & power_final(6 downto 4);
-    U_HEX1: decodificador_7seg port map (nibble => upper_nibble, seg => hex1);
+    -- Conversor Binário para BCD (Decimal)
+    U_BIN2BCD: bin_to_bcd 
+        port map (
+            bin_in  => power_final,
+            dezena  => bcd_dezena,
+            unidade => bcd_unidade
+        );
+    
+    -- Displays de 7 segmentos (mostra valores decimais)
+    U_HEX0: decodificador_7seg port map (nibble => bcd_unidade, seg => hex0); -- Unidades
+    U_HEX1: decodificador_7seg port map (nibble => bcd_dezena,  seg => hex1);  -- Dezenas
 
 end Structural;

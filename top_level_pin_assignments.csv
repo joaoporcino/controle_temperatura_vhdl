@@ -7,9 +7,9 @@
 # Note: The column header names should not be changed if you wish to import this .csv file into the Quartus II software.
 
 To,Location
-clk_sys,PIN_N25           #sw0
-rst,PIN_N26               #sw1
-temp_int_min[0],PIN_AE14  #sw3
+clk_sys,PIN_N25           
+rst,PIN_N26               
+temp_int_min[0],PIN_AE14  
 temp_int_min[1],PIN_AF14
 temp_int_min[2],PIN_AD13
 temp_int_min[3],PIN_AC13
@@ -24,28 +24,29 @@ temp_ext_max[3],PIN_U3
 temp_ext_max[4],PIN_U4
 temp_ext_max[5],PIN_V1
 temp_ext_max[6],PIN_V2
-states_out[0],PIN_AE22      #ledg0
-states_out[1],PIN_AF22      #1
-states_out[2],PIN_W19       #2
+states_out[0],PIN_AE22
+states_out[1],PIN_AF22
+states_out[2],PIN_W19
 states_out[3],PIN_V18
 states_out[4],PIN_U18
 states_out[5],PIN_U17
-states_out[6],PIN_AA20  #ledg6
+states_out[6],PIN_AA20
 led_alert,PIN_AE12
-led_alert,PIN_AD12      #led17
-motor_pow_h,PIN_AE23    #ledr#0
-motor_pow_c,PIN_AF23    #ledr#1
-hex0[0],PIN_AF10
-hex0[1],PIN_AB12
-hex0[2],PIN_AC12
+led_alert,PIN_AD12
+motor_pow_h,PIN_AE23
+motor_pow_c,PIN_AF23
+hex0[6],PIN_AF10
+hex0[5],PIN_AB12
+hex0[4],PIN_AC12
 hex0[3],PIN_AD11
-hex0[4],PIN_AE11
-hex0[5],PIN_V14
-hex0[6],PIN_V13
-hex1[0],PIN_V20
-hex1[1],PIN_V21
-hex1[2],PIN_W21
+hex0[2],PIN_AE11
+hex0[1],PIN_V14
+hex0[0],PIN_V13
+hex1[6],PIN_V20
+hex1[5],PIN_V21
+hex1[4],PIN_W21
 hex1[3],PIN_Y22
-hex1[4],PIN_AA24
-hex1[5],PIN_AA23
-hex1[6],PIN_AB24
+hex1[2],PIN_AA24
+hex1[1],PIN_AA23
+hex1[0],PIN_AB24
+
