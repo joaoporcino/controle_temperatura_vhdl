@@ -1,4 +1,0 @@
-v 4
-file / "C:\Users\070212\OneDrive - Construtora Barbosa Mello SA\Área de Trabalho\Coisas\Faculdade\ENGENHARIA DE SISTEMAS\2025-02\LAB SISTEMAS DIGITAIS\trabalho_final\src\control.vhd" "8910b24afaa024fa9ee7c9ea651d2412aee03673" "20251205024342.341":
-  entity control_decoder at 1( 0) + 0 on 11;
-  architecture dataflow of control_decoder at 11( 189) + 0 on 12;
