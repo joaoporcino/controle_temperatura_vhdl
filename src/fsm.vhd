@@ -20,11 +20,7 @@ entity controller is
         enab_pow : out STD_LOGIC;
         enab_flags : out STD_LOGIC;
         
-        -- Saídas para o Mundo Externo (LEDs/Motores)
-        -- Adicionei estas pois os estados HEATING/COOLING precisam acionar algo
-        heat_out   : out STD_LOGIC;
-        cool_out   : out STD_LOGIC;
-        stable_out : out STD_LOGIC
+        states_out : out STD_LOGIC_VECTOR (3 downto 0)
     );
 end controller;
 
@@ -114,6 +110,16 @@ begin
     -- PROCESSO 3: Lógica de Saída (Combinacional)
     output_proc: process(present_state)
     begin
+	             enab_max   <= '0';
+                enab_min   <= '0';
+                enab_ext   <= '0';
+                enab_int   <= '0';
+                enab_pow   <= '0';
+                heat_out   <= '0';
+                cool_out   <= '0';
+                stable_out <= '0';
+                enab_flags <= '0';
+                states_out <= '0000000';
         -- Defaults (tudo zero para evitar latches e acionamentos indevidos)
 
         case present_state is
@@ -127,10 +133,12 @@ begin
                 cool_out   <= '0';
                 stable_out <= '0';
                 enab_flags <= '0';
+                states_out <= '0000001';
                 
 			when st_LOAD =>
                 enab_max <= '0';
                 enab_min <= '0';
+                states_out <= '0000010';
                 
             when st_RINTEXT =>
                 enab_max <= '0';
@@ -139,30 +147,36 @@ begin
                 enab_int <= '1';
                 enab_pow <= '0';
                 enab_flags <= '0';-- Indica estabilidade
+                states_out <= '0000100';
 
 
             when st_CALC =>
                 enab_pow <= '1';
                 enab_flags <= '1';-- Habilita o cálculo da potência/diferença
+                states_out <= '0001000';
+
 
             when st_HEATING =>
-                heat_out <= '1';
-                cool_out <= '0';
-                stable_out <= '0'; -- Indica estabilidade
+               -- heat_out <= '1';
+               -- cool_out <= '0';
+               -- stable_out <= '0'; -- Indica estabilidade
+               states_out <= '0010000';
 -- Liga o resfriador
 -- Liga o aquecedor
 
             when st_COOLING =>
-                cool_out <= '1';
-                heat_out <= '0';
-                stable_out <= '0'; -- Indica estabilidade
+                --cool_out <= '1';
+                --heat_out <= '0';
+                --stable_out <= '0'; -- Indica estabilidade
+                states_out <= '0100000';
 -- Liga o aquecedor
 -- Liga o resfriador
 
             when st_STABLE =>
-                stable_out <= '1';
-                heat_out <= '0';
-                cool_out <= '0'; -- Liga o resfriador
+                --stable_out <= '1';
+                --heat_out <= '0';
+                --cool_out <= '0'; -- Liga o resfriador
+                states_out <= '1000000';
 -- Liga o aquecedor
 -- Indica estabilidade
 

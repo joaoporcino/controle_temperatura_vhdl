@@ -19,8 +19,8 @@ entity datapath is
         s : out STD_LOGIC;
         pow_c : out STD_LOGIC; 
         pow_h : out STD_LOGIC; 
+		ctrl  : out STD_LOGIC;
         alert     : out STD_LOGIC;
-        power_out : out STD_LOGIC_VECTOR(6 downto 0);
         hex0      : out STD_LOGIC_VECTOR(6 downto 0);
         hex1      : out STD_LOGIC_VECTOR(6 downto 0)
     );
@@ -38,16 +38,14 @@ architecture Structural of datapath is
         Port ( A, B : in STD_LOGIC_VECTOR (N-1 downto 0); Y : out STD_LOGIC_VECTOR (N-1 downto 0));
     end component;
 
-    component shifter is
+    component shifter4 is
         Generic ( N : integer := 9; SHIFT_AMT : integer := 1 );
-        Port ( Din : in STD_LOGIC_VECTOR (N-1 downto 0); Dout : out STD_LOGIC_VECTOR (N-1 downto 0));
+        Port ( power_calc_raw  : STD_LOGIC_VECTOR(8 downto 0);
+				  power_neg : in STD_LOGIC_VECTOR (8 downto 0);
+				  Dout : out STD_LOGIC_VECTOR (8 downto 0));
     end component;
 
-    component comparadorH_7bits is 
-        Port ( enab : in STD_LOGIC; int, min : in STD_LOGIC_VECTOR(6 downto 0); h : out STD_LOGIC );
-    end component;
-
-    component comparadorC_7bits is 
+    component comparador_7bits is 
         Port ( enab : in STD_LOGIC; int, max : in STD_LOGIC_VECTOR(6 downto 0); c : out STD_LOGIC );
     end component;
     
@@ -57,11 +55,15 @@ architecture Structural of datapath is
     
     component status_decoder is
         Port (
-            h_in, c_in     : in  STD_LOGIC;
-            power_sign_bit : in  STD_LOGIC;
-            s_out          : out STD_LOGIC;
-            pow_c, pow_h   : out STD_LOGIC
+            enable, h_in, c_in : in  STD_LOGIC;
+            power_sign_bit     : in  STD_LOGIC;
+            s_out              : out STD_LOGIC;
+            pow_c, pow_h       : out STD_LOGIC
         );
+    end component;
+	 
+	 component control_decoder is
+        Port ( reset : in STD_LOGIC; not_reset : out STD_LOGIC );
     end component;
 
     component registrador is
@@ -87,7 +89,6 @@ architecture Structural of datapath is
     
     signal power_calc_raw : STD_LOGIC_VECTOR(8 downto 0); 
     signal power_neg      : STD_LOGIC_VECTOR(8 downto 0);
-    signal power_abs_9bit : STD_LOGIC_VECTOR(8 downto 0); 
     signal power_shifted  : STD_LOGIC_VECTOR(8 downto 0);
     signal power_mag_7bit : STD_LOGIC_VECTOR(6 downto 0); 
     
@@ -104,8 +105,11 @@ begin
     R_MAX: registrador port map (clk=>clk, rst=>rst, en=>enab_max, d_in=>temp_ext_max, q_out=>reg_temp_max);
 
     -- 2. Comparadores
-    COMP_H: comparadorH_7bits port map (enab => enab_flags, int => reg_temp_int, min => reg_temp_min, h => h_internal);
-    COMP_C: comparadorC_7bits port map (enab => enab_flags, int => reg_temp_int, max => reg_temp_max, c => c_internal);
+    COMP_H: comparador_7bits port map (enab => enab_flags, A => reg_temp_min, B => reg_temp_int, out => h_internal);
+    COMP_C: comparador_7bits port map (enab => enab_flags, A => reg_temp_int, B => reg_temp_max, out => c_internal);
+	 
+	 
+    U_CONTROL_DEC: control_decoder port map ( reset => rst, not_reset => ctrl);
     
     h <= h_internal;
     c <= c_internal;
@@ -129,6 +133,7 @@ begin
     -- 4. Status Decoder
     U_STATUS_DEC: status_decoder
         port map (
+            enable         => enab_pow,
             h_in           => h_internal,
             c_in           => c_internal,
             power_sign_bit => power_calc_raw(8),
@@ -139,14 +144,13 @@ begin
 
     -- 5. Magnitude e Final Shift
     U_SUB_NEG: subtractor generic map (N => 9) port map (A => (others=>'0'), B => power_calc_raw, Y => power_neg);
-    power_abs_9bit <= power_neg when power_calc_raw(8) = '1' else power_calc_raw;
 
-    U_FINAL_SHIFT: shifter generic map (N => 9, SHIFT_AMT => 2) 
-        port map (Din => power_abs_9bit, Dout => power_shifted);
+    U_FINAL_SHIFT: shifter4 generic map (N => 9, SHIFT_AMT => 2) 
+        port map (power_calc_raw => power_calc_raw, power_neg => power_neg, Dout => power_shifted);
 
     power_mag_7bit <= power_shifted(6 downto 0);
 
-    U_REG_FINAL: registrador 
+    U_REG_POWER: registrador 
         port map (
             clk => clk, rst => rst, en => enab_pow, d_in => power_mag_7bit, q_out => power_final
         );
@@ -158,7 +162,5 @@ begin
     U_HEX0: decodificador_7seg port map (nibble => power_final(3 downto 0), seg => hex0);
     upper_nibble <= '0' & power_final(6 downto 4);
     U_HEX1: decodificador_7seg port map (nibble => upper_nibble, seg => hex1);
-
-    power_out <= power_final;
 
 end Structural;

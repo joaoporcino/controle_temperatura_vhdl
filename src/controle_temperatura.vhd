@@ -1,9 +1,9 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity top_level is
+entity controle_temperatura is
     Port (
-        clk_50MHz : in  STD_LOGIC;
+        clk_sys : in  STD_LOGIC;
         rst       : in  STD_LOGIC;
         
         -- Entradas
@@ -19,52 +19,75 @@ entity top_level is
         motor_pow_c : out STD_LOGIC; -- Sinal de força para Resfriar
         motor_pow_h : out STD_LOGIC; -- Sinal de força para Aquecer
         
-        -- Saída de Dados
-        power_out  : out STD_LOGIC_VECTOR(6 downto 0);
-        
         -- Displays
         hex0       : out STD_LOGIC_VECTOR(6 downto 0);
         hex1       : out STD_LOGIC_VECTOR(6 downto 0)
     );
-end top_level;
+end controle_temperatura;
 
-architecture Structural of top_level is
+architecture Structural of controle_temperatura is
 
-    component clock_divider is
-        Port ( clk_in : in STD_LOGIC; rst : in STD_LOGIC; clk_out : out STD_LOGIC );
-    end component;
-
-    component control_decoder is
-        Port ( reset : in STD_LOGIC; not_reset : out STD_LOGIC );
-    end component;
-
-    signal clk_sys : STD_LOGIC; 
-
+	 
+	 component controller is
+		Port(
+        clk      : in  STD_LOGIC;
+        rst      : in  STD_LOGIC;
+        control  : in  STD_LOGIC; 
+        c : in std_logic; 
+        h : in std_logic; 
+        s : in std_logic; 
+        enab_max : out STD_LOGIC;
+        enab_min : out STD_LOGIC;
+        enab_ext : out STD_LOGIC;
+        enab_int : out STD_LOGIC;
+        enab_pow : out STD_LOGIC;
+        enab_flags : out STD_LOGIC;
+        heat_out   : out STD_LOGIC;
+        cool_out   : out STD_LOGIC;
+        stable_out : out STD_LOGIC
+		); 
+	 end component;
+		
+	component datapath is
+	    Port (
+        clk      : in  STD_LOGIC;
+        rst      : in  STD_LOGIC;
+        temp_int_min : in STD_LOGIC_VECTOR(6 downto 0);
+        temp_ext_max : in STD_LOGIC_VECTOR(6 downto 0);
+        enab_max : in STD_LOGIC;
+        enab_min : in STD_LOGIC;
+        enab_ext : in STD_LOGIC;
+        enab_int : in STD_LOGIC;
+        enab_pow : in STD_LOGIC;
+        enab_flags : in STD_LOGIC; 
+        c : out STD_LOGIC;
+        h : out STD_LOGIC;
+        s : out STD_LOGIC;
+        pow_c : out STD_LOGIC; 
+        pow_h : out STD_LOGIC; 
+		ctrl :  out STD_LOGIC;
+        alert     : out STD_LOGIC;
+        hex0      : out STD_LOGIC_VECTOR(6 downto 0);
+        hex1      : out STD_LOGIC_VECTOR(6 downto 0)
+        );
+	end component;
+	 
     -- Fios de Controle
     signal w_enab_max, w_enab_min : STD_LOGIC;
     signal w_enab_ext, w_enab_int : STD_LOGIC;
     signal w_enab_pow, w_enab_flags : STD_LOGIC;
-    signal control_sw : STD_LOGIC;
+	signal CTRL_CONC : STD_LOGIC;
 
     -- Fios de Flags
     signal w_flag_c, w_flag_h, w_flag_s : STD_LOGIC;
 
 begin
 
-    -- Inversor de Reset para Control
-    -- Quando rst = '1' (ativo), control_sw = '0' (sistema parado)
-    -- Quando rst = '0' (inativo), control_sw = '1' (sistema rodando)
-    U_CONTROL_DEC: control_decoder
-        port map ( reset => rst, not_reset => control_sw );
-
-    U_CLK_DIV: clock_divider
-        port map ( clk_in => clk_50MHz, rst => rst, clk_out => clk_sys );
-
     U_CONTROLLER: entity work.controller
         port map (
             clk        => clk_sys,
             rst        => rst,
-            control    => control_sw,
+            control    => CTRL_CONC,
             c          => w_flag_c,
             h          => w_flag_h,
             s          => w_flag_s,
@@ -97,9 +120,10 @@ begin
 
             pow_c        => motor_pow_c, 
             pow_h        => motor_pow_h,
+			ctrl         => CTRL_CONC,
+
             
             alert        => led_alert,
-            power_out    => power_out,
             hex0         => hex0,
             hex1         => hex1
         );

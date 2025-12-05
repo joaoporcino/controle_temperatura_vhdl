@@ -7,9 +7,9 @@
 # Note: The column header names should not be changed if you wish to import this .csv file into the Quartus II software.
 
 To,Location
-clk_50MHz,PIN_N2
-rst,PIN_N26
-temp_int_min[0],PIN_AE14
+clk_sys,PIN_N25           #sw0
+rst,PIN_N26               #sw1
+temp_int_min[0],PIN_AE14  #sw3
 temp_int_min[1],PIN_AF14
 temp_int_min[2],PIN_AD13
 temp_int_min[3],PIN_AC13
@@ -17,25 +17,24 @@ temp_int_min[4],PIN_C13
 temp_int_min[5],PIN_B13
 temp_int_min[6],PIN_A13
 temp_ext_max[0],PIN_N1
-temp_ext_max[1],PIN_P1
-temp_ext_max[2],PIN_P2
-temp_ext_max[3],PIN_T7
-temp_ext_max[4],PIN_U3
-temp_ext_max[5],PIN_U4
-temp_ext_max[6],PIN_V1
-led_heat,PIN_AE22
-led_cool,PIN_AF22
-led_stable,PIN_W19
-led_alert,PIN_V18
-motor_pow_c,PIN_U18
-motor_pow_h,PIN_U17
-power_out[0],PIN_AE23
-power_out[1],PIN_AF23
-power_out[2],PIN_AB21
-power_out[3],PIN_AC22
-power_out[4],PIN_AD22
-power_out[5],PIN_AD23
-power_out[6],PIN_AD21
+temp_ext_max[0],PIN_P1
+temp_ext_max[1],PIN_P2
+temp_ext_max[2],PIN_T7
+temp_ext_max[3],PIN_U3
+temp_ext_max[4],PIN_U4
+temp_ext_max[5],PIN_V1
+temp_ext_max[6],PIN_V2
+states_out[0],PIN_AE22      #ledg0
+states_out[1],PIN_AF22      #1
+states_out[2],PIN_W19       #2
+states_out[3],PIN_V18
+states_out[4],PIN_U18
+states_out[5],PIN_U17
+states_out[6],PIN_AA20  #ledg6
+led_alert,PIN_AE12
+led_alert,PIN_AD12      #led17
+motor_pow_h,PIN_AE23    #ledr#0
+motor_pow_c,PIN_AF23    #ledr#1
 hex0[0],PIN_AF10
 hex0[1],PIN_AB12
 hex0[2],PIN_AC12
