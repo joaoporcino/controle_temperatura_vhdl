@@ -1,0 +1,145 @@
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                         PLACA ALTERA DE2 - CYCLONE II                           │
+│                      MAPEAMENTO DE PINOS DO PROJETO                             │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  SWITCHES (18 switches deslizantes)                                             │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  SW0  SW1    SW2        SW3  SW4  SW5  SW6  SW7  SW8  SW9   SW10-SW16          │
+│  [ ]  [ ]    [ ]        [            7 bits            ]    [   7 bits   ]     │
+│   │    │      │          └─────────────┬────────────────┘    └──────┬──────┘    │
+│   │    │      │                        │                            │           │
+│  N/A  RST  CONTROL         TEMP_INT_MIN (SW3-9)         TEMP_EXT_MAX (SW10-16) │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  LEDs VERDES (9 LEDs)                                                           │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  LEDG0  LEDG1   LEDG2    LEDG3   LEDG4      LEDG5     LEDG6  LEDG7  LEDG8      │
+│   (●)    (●)     (●)      (●)     (●)        (●)       ( )    ( )    ( )       │
+│    │     │       │        │       │          │                                 │
+│  HEAT  COOL   STABLE   ALERT  MOTOR_C   MOTOR_H                                │
+│ (Aquecer)(Resfriar)(OK)(Alerta)(Resfria)(Aquece)                               │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  LEDs VERMELHOS (18 LEDs)                                                       │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  LEDR0 LEDR1 LEDR2 LEDR3 LEDR4 LEDR5 LEDR6  LEDR7-17                           │
+│   (●)   (●)   (●)   (●)   (●)   (●)   (●)    ( ) ...                           │
+│   └────────────────┬────────────────────┘                                      │
+│                    │                                                            │
+│              POWER_OUT[6:0]                                                     │
+│         (Potência calculada em binário)                                         │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  DISPLAYS DE 7 SEGMENTOS (8 displays)                                          │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│    HEX7   HEX6   HEX5   HEX4   HEX3   HEX2   HEX1      HEX0                    │
+│    ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐     ┌───┐                       │
+│    │   │ │   │ │   │ │   │ │   │ │   │ │ 7 │     │ 5 │                       │
+│    └───┘ └───┘ └───┘ └───┘ └───┘ └───┘ └───┘     └───┘                       │
+│     N/A   N/A   N/A   N/A   N/A   N/A  DEZENAS   UNIDADES                      │
+│                                          │          │                           │
+│                                          └──────────┴──────── POTÊNCIA (75)     │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  EXEMPLO DE CONFIGURAÇÃO: Temperatura Baixa (Precisa Aquecer)
+═══════════════════════════════════════════════════════════════════════════════
+
+ENTRADAS:
+───────────────────────────────────────────────────────────────────────────────
+  SW1  = OFF (0)    → Sistema rodando (não resetado)
+  SW2  = ON  (1)    → Sistema ativo
+  
+  SW3-9 = 0011001   → Temp Interna/Mín = 25°C
+          ││││││└─── SW3  = ON
+          │││││└──── SW4  = OFF
+          ││││└───── SW5  = OFF
+          │││└────── SW6  = ON
+          ││└─────── SW7  = ON
+          │└──────── SW8  = OFF
+          └───────── SW9  = OFF
+  
+  SW10-16 = 0010100 → Temp Externa/Máx = 20°C
+            ││││││└─── SW10 = OFF
+            │││││└──── SW11 = OFF
+            ││││└───── SW12 = ON
+            │││└────── SW13 = OFF
+            ││└─────── SW14 = ON
+            │└──────── SW15 = OFF
+            └───────── SW16 = OFF
+
+SAÍDAS ESPERADAS:
+───────────────────────────────────────────────────────────────────────────────
+  LEDG0 (led_heat)    = ACESO ●     → Precisa aquecer!
+  LEDG1 (led_cool)    = APAGADO     → Não precisa resfriar
+  LEDG2 (led_stable)  = APAGADO     → Não está estável
+  LEDG3 (led_alert)   = DEPENDE     → Baseado na potência
+  LEDG5 (motor_pow_h) = ACESO ●     → Motor de aquecimento ON
+  
+  HEX1-HEX0           = "__"        → Mostra potência calculada
+  LEDR0-6             = [binário]   → Valor da potência
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  FLUXO DE OPERAÇÃO
+═══════════════════════════════════════════════════════════════════════════════
+
+  1. RESET (SW1 = ON)
+     ↓
+  2. Configure temperaturas (SW3-16)
+     ↓
+  3. Ative sistema (SW1 = OFF, SW2 = ON)
+     ↓
+  4. Sistema lê sensores
+     ↓
+  5. Calcula potência necessária
+     ↓
+  6. Define estado (HEAT/COOL/STABLE)
+     ↓
+  7. Acende LEDs correspondentes
+     ↓
+  8. Exibe potência nos displays
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  REFERÊNCIA RÁPIDA DE VALORES
+═══════════════════════════════════════════════════════════════════════════════
+
+  Temperatura | Binário (7 bits) | Switches a LIGAR
+  ─────────────────────────────────────────────────────────────────────────────
+     0°C      |    0000000       | Nenhum
+    20°C      |    0010100       | SW12, SW14 (ou SW5, SW7 no outro grupo)
+    25°C      |    0011001       | SW3, SW6, SW7 (ou SW10, SW13, SW14)
+    50°C      |    0110010       | SW2, SW6, SW9 (ou SW11, SW15, SW16)
+    75°C      |    1001011       | SW1, SW2, SW4, SW7, SW9
+   100°C      |    1100100       | SW3, SW6, SW8, SW9
+   127°C      |    1111111       | Todos (valor máximo)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  NOTAS IMPORTANTES
+═══════════════════════════════════════════════════════════════════════════════
+
+  ⚠️  Os displays de 7 segmentos da DE2 são ACTIVE LOW:
+      → 0 = segmento aceso
+      → 1 = segmento apagado
+      
+  ⚠️  Se os números aparecerem invertidos, verifique o decoder7seg.vhd
+  
+  ✅  O clock de 50MHz é automático, não precisa configurar manualmente
+  
+  ✅  Use SW0 como reserva para futuras expansões

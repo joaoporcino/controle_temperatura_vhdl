@@ -1,0 +1,52 @@
+# Quartus II Version 5.1 Internal Build 160 09/19/2005 TO Full Version
+# File: top_level_pin_assignments.csv
+# Generated on: Wed Dec 04 20:11:00 2024
+# Project: Sistema de Controle de Temperatura
+# Entity: top_level
+
+# Note: The column header names should not be changed if you wish to import this .csv file into the Quartus II software.
+
+To,Location
+clk_50MHz,PIN_N2
+rst,PIN_N26
+temp_int_min[0],PIN_AE14
+temp_int_min[1],PIN_AF14
+temp_int_min[2],PIN_AD13
+temp_int_min[3],PIN_AC13
+temp_int_min[4],PIN_C13
+temp_int_min[5],PIN_B13
+temp_int_min[6],PIN_A13
+temp_ext_max[0],PIN_N1
+temp_ext_max[1],PIN_P1
+temp_ext_max[2],PIN_P2
+temp_ext_max[3],PIN_T7
+temp_ext_max[4],PIN_U3
+temp_ext_max[5],PIN_U4
+temp_ext_max[6],PIN_V1
+led_heat,PIN_AE22
+led_cool,PIN_AF22
+led_stable,PIN_W19
+led_alert,PIN_V18
+motor_pow_c,PIN_U18
+motor_pow_h,PIN_U17
+power_out[0],PIN_AE23
+power_out[1],PIN_AF23
+power_out[2],PIN_AB21
+power_out[3],PIN_AC22
+power_out[4],PIN_AD22
+power_out[5],PIN_AD23
+power_out[6],PIN_AD21
+hex0[0],PIN_AF10
+hex0[1],PIN_AB12
+hex0[2],PIN_AC12
+hex0[3],PIN_AD11
+hex0[4],PIN_AE11
+hex0[5],PIN_V14
+hex0[6],PIN_V13
+hex1[0],PIN_V20
+hex1[1],PIN_V21
+hex1[2],PIN_W21
+hex1[3],PIN_Y22
+hex1[4],PIN_AA24
+hex1[5],PIN_AA23
+hex1[6],PIN_AB24
