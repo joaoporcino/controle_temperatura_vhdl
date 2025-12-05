@@ -1,0 +1,13 @@
+# Pasta jmcp-asfa
+jmcp-asfa/
+
+# Arquivos de simulação GHDL
+*.o
+*.cf
+*.vcd
+work-obj93.cf
+
+# Arquivos temporários
+*.bak
+*.tmp
+*~
