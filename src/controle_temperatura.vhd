@@ -27,7 +27,6 @@ end controle_temperatura;
 
 architecture Structural of controle_temperatura is
 
-	 
 	 component controller is
 		Port(
         clk      : in  STD_LOGIC;
@@ -36,15 +35,10 @@ architecture Structural of controle_temperatura is
         c : in std_logic; 
         h : in std_logic; 
         s : in std_logic; 
-        enab_max : out STD_LOGIC;
-        enab_min : out STD_LOGIC;
-        enab_ext : out STD_LOGIC;
-        enab_int : out STD_LOGIC;
+        enab_max_min : out STD_LOGIC;
+        enab_ext_int : out STD_LOGIC;
         enab_pow : out STD_LOGIC;
-        enab_flags : out STD_LOGIC;
-        heat_out   : out STD_LOGIC;
-        cool_out   : out STD_LOGIC;
-        stable_out : out STD_LOGIC
+        states_out : out STD_LOGIC_VECTOR (3 downto 0)
 		); 
 	 end component;
 		
@@ -54,12 +48,9 @@ architecture Structural of controle_temperatura is
         rst      : in  STD_LOGIC;
         temp_int_min : in STD_LOGIC_VECTOR(6 downto 0);
         temp_ext_max : in STD_LOGIC_VECTOR(6 downto 0);
-        enab_max : in STD_LOGIC;
-        enab_min : in STD_LOGIC;
-        enab_ext : in STD_LOGIC;
-        enab_int : in STD_LOGIC;
+        enab_max-min: in STD_LOGIC;
+        enab_ext-int : in STD_LOGIC;
         enab_pow : in STD_LOGIC;
-        enab_flags : in STD_LOGIC; 
         c : out STD_LOGIC;
         h : out STD_LOGIC;
         s : out STD_LOGIC;
@@ -91,29 +82,21 @@ begin
             c          => w_flag_c,
             h          => w_flag_h,
             s          => w_flag_s,
-            enab_max   => w_enab_max,
-            enab_min   => w_enab_min,
-            enab_ext   => w_enab_ext,
-            enab_int   => w_enab_int,
+            enab_max_min  => w_enab_max_min,
+            enab_ext_int  => w_enab_ext_int,
             enab_pow   => w_enab_pow,
-            enab_flags => w_enab_flags, 
-            heat_out   => led_heat,
-            cool_out   => led_cool,
-            stable_out => led_stable
+            states_out : out STD_LOGIC_VECTOR (3 downto 0)
         );
 
     U_DATAPATH: entity work.datapath
         port map (
-            clk          => clk_sys,
-            rst          => rst,
-            temp_int_min => temp_int_min,
-            temp_ext_max => temp_ext_max,
-            enab_max     => w_enab_max,
-            enab_min     => w_enab_min,
-            enab_ext     => w_enab_ext,
-            enab_int     => w_enab_int,
-            enab_pow     => w_enab_pow,
-            enab_flags   => w_enab_flags,
+            clk           => clk_sys,
+            rst           => rst,
+            temp_int_min  => temp_int_min,
+            temp_ext_max  => temp_ext_max,
+            enab_max_min  => w_enab_max_min,
+            enab_ext_int  => w_enab_ext_int,
+            enab_pow      => w_enab_pow,
             c            => w_flag_c,
             h            => w_flag_h,
             s            => w_flag_s,

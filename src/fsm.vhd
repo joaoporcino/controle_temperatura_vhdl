@@ -13,12 +13,9 @@ entity controller is
         s : in std_logic; -- Flag Stable (Estável)
 
         -- Saídas de Controle para o Datapath (Enables)
-        enab_max : out STD_LOGIC;
-        enab_min : out STD_LOGIC;
-        enab_ext : out STD_LOGIC;
-        enab_int : out STD_LOGIC;
+        enab_max_min : out STD_LOGIC;
+        enab_ext_int : out STD_LOGIC;
         enab_pow : out STD_LOGIC;
-        enab_flags : out STD_LOGIC;
         
         states_out : out STD_LOGIC_VECTOR (3 downto 0)
     );
@@ -60,7 +57,7 @@ begin
         case present_state is
             when st_RESET =>
                 if control = '1' then
-                    next_state <= st_RINTEXT;
+                    next_state <= st_LOAD;
                 else
                     next_state <= st_RESET;
                 end if;
@@ -85,21 +82,18 @@ begin
 
             -- Lógica de Retorno (Loop de Monitoramento)
            when st_HEATING =>
-                if control = '0' then next_state <= st_RESET;
-                elsif h = '0' then    next_state <= st_RINTEXT; -- Só sai se parar de precisar de Heat
-                else                  next_state <= st_HEATING; -- Senão, continua aquecendo
+                if control = '0' then next_state <= st_RESET; 
+                else                  next_state <= st_RINTEXT; -- Senão, continua aquecendo
                 end if;
 
             when st_COOLING =>
                 if control = '0' then next_state <= st_RESET;
-                elsif c = '0' then    next_state <= st_RINTEXT;
-                else                  next_state <= st_COOLING;
+                else                  next_state <= st_RINTEXT;
                 end if;
 
             when st_STABLE =>
                 if control = '0' then next_state <= st_RESET;
-                elsif s = '0' then    next_state <= st_RINTEXT;
-                else                  next_state <= st_STABLE;
+                else                  next_state <= st_RINTEXT;
                 end if;
                 
             when others =>
@@ -110,75 +104,37 @@ begin
     -- PROCESSO 3: Lógica de Saída (Combinacional)
     output_proc: process(present_state)
     begin
-	             enab_max   <= '0';
-                enab_min   <= '0';
-                enab_ext   <= '0';
-                enab_int   <= '0';
+	            enab_max_min   <= '0';
+                enab_ext_int   <= '0';
                 enab_pow   <= '0';
-                heat_out   <= '0';
-                cool_out   <= '0';
-                stable_out <= '0';
-                enab_flags <= '0';
                 states_out <= '0000000';
-        -- Defaults (tudo zero para evitar latches e acionamentos indevidos)
 
         case present_state is
             when st_RESET =>
-                enab_max   <= '1';
-                enab_min   <= '1';
-                enab_ext   <= '0';
-                enab_int   <= '0';
+                enab_max_min   <= '1';
+                enab_ext_int   <= '0';
                 enab_pow   <= '0';
-                heat_out   <= '0';
-                cool_out   <= '0';
-                stable_out <= '0';
-                enab_flags <= '0';
                 states_out <= '0000001';
                 
 			when st_LOAD =>
-                enab_max <= '0';
-                enab_min <= '0';
+                enab_max_min <= '0';
                 states_out <= '0000010';
                 
             when st_RINTEXT =>
-                enab_max <= '0';
-                enab_min <= '0';
-                enab_ext <= '1';
-                enab_int <= '1';
+                enab_max_min <= '0';
+                enab_ext_int <= '1';
                 enab_pow <= '0';
-                enab_flags <= '0';-- Indica estabilidade
                 states_out <= '0000100';
-
 
             when st_CALC =>
                 enab_pow <= '1';
-                enab_flags <= '1';-- Habilita o cálculo da potência/diferença
                 states_out <= '0001000';
 
+            when st_HEATING => states_out <= '0010000';
 
-            when st_HEATING =>
-               -- heat_out <= '1';
-               -- cool_out <= '0';
-               -- stable_out <= '0'; -- Indica estabilidade
-               states_out <= '0010000';
--- Liga o resfriador
--- Liga o aquecedor
+            when st_COOLING => states_out <= '0100000';
 
-            when st_COOLING =>
-                --cool_out <= '1';
-                --heat_out <= '0';
-                --stable_out <= '0'; -- Indica estabilidade
-                states_out <= '0100000';
--- Liga o aquecedor
--- Liga o resfriador
-
-            when st_STABLE =>
-                --stable_out <= '1';
-                --heat_out <= '0';
-                --cool_out <= '0'; -- Liga o resfriador
-                states_out <= '1000000';
--- Liga o aquecedor
--- Indica estabilidade
+            when st_STABLE  => states_out <= '1000000';
 
             when others =>
                 null;

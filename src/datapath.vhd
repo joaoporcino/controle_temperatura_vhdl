@@ -8,12 +8,9 @@ entity datapath is
         rst      : in  STD_LOGIC;
         temp_int_min : in STD_LOGIC_VECTOR(6 downto 0);
         temp_ext_max : in STD_LOGIC_VECTOR(6 downto 0);
-        enab_max : in STD_LOGIC;
-        enab_min : in STD_LOGIC;
-        enab_ext : in STD_LOGIC;
-        enab_int : in STD_LOGIC;
-        enab_pow : in STD_LOGIC;
-        enab_flags : in STD_LOGIC; 
+        enab_max-min: in STD_LOGIC;
+        enab_ext-int : in STD_LOGIC;
+        enab_pow : in STD_LOGIC; 
         c : out STD_LOGIC;
         h : out STD_LOGIC;
         s : out STD_LOGIC;
@@ -99,14 +96,14 @@ architecture Structural of datapath is
 begin
 
     -- 1. Registradores
-    R_INT: registrador port map (clk=>clk, rst=>rst, en=>enab_int, d_in=>temp_int_min, q_out=>reg_temp_int);
-    R_MIN: registrador port map (clk=>clk, rst=>rst, en=>enab_min, d_in=>temp_int_min, q_out=>reg_temp_min);
-    R_EXT: registrador port map (clk=>clk, rst=>rst, en=>enab_ext, d_in=>temp_ext_max, q_out=>reg_temp_ext);
-    R_MAX: registrador port map (clk=>clk, rst=>rst, en=>enab_max, d_in=>temp_ext_max, q_out=>reg_temp_max);
+    R_INT: registrador port map (clk=>clk, rst=>rst, en=>enab_ext-int, d_in=>temp_int_min, q_out=>reg_temp_int);
+    R_MIN: registrador port map (clk=>clk, rst=>rst, en=>enab_max-min, d_in=>temp_int_min, q_out=>reg_temp_min);
+    R_EXT: registrador port map (clk=>clk, rst=>rst, en=>enab_ext-int, d_in=>temp_ext_max, q_out=>reg_temp_ext);
+    R_MAX: registrador port map (clk=>clk, rst=>rst, en=>enab_max-min, d_in=>temp_ext_max, q_out=>reg_temp_max);
 
     -- 2. Comparadores
-    COMP_H: comparador_7bits port map (enab => enab_flags, A => reg_temp_min, B => reg_temp_int, out => h_internal);
-    COMP_C: comparador_7bits port map (enab => enab_flags, A => reg_temp_int, B => reg_temp_max, out => c_internal);
+    COMP_H: comparador_7bits port map (enab => enab_pow, A => reg_temp_min, B => reg_temp_int, out => h_internal);
+    COMP_C: comparador_7bits port map (enab => enab_pow, A => reg_temp_int, B => reg_temp_max, out => c_internal);
 	 
 	 
     U_CONTROL_DEC: control_decoder port map ( reset => rst, not_reset => ctrl);
@@ -157,7 +154,7 @@ begin
 
     -- 6. Saídas
     U_ALERT: comparadorAlerta 
-        port map (enab => enab_flags, val => power_final, alerta => alert);
+        port map (enab => enab_pow, val => power_final, alerta => alert);
 
     U_HEX0: decodificador_7seg port map (nibble => power_final(3 downto 0), seg => hex0);
     upper_nibble <= '0' & power_final(6 downto 4);
