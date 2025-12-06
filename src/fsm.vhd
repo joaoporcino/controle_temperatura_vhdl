@@ -26,7 +26,6 @@ architecture Behavioral of controller is
     -- Definição dos Estados (Total: 7 estados listados na sua type)
     type state_type is (
         st_RESET, 
-        st_LOAD,
         st_RINTEXT,   -- Lê sensores Interno/Externo
         st_CALC,      -- Habilita cálculo de potência e verifica flags
         st_COOLING,   -- Estado de resfriamento
@@ -57,16 +56,12 @@ begin
         case present_state is
             when st_RESET =>
                 if control = '1' then
-                    next_state <= st_LOAD;
+                    next_state <= st_RINTEXT;
                 else
                     next_state <= st_RESET;
                 end if;
-                
-            when st_LOAD => 
-            	next_state <= st_RINTEXT;
 
             when st_RINTEXT =>
-                -- Após ler sensores, vai para cálculo/verificação
                 next_state <= st_CALC;
 
             when st_CALC =>
@@ -80,7 +75,6 @@ begin
                     next_state <= st_CALC; 
                 end if;
 
-            -- Lógica de Retorno (Loop de Monitoramento)
            when st_HEATING =>
                 if control = '0' then next_state <= st_RESET; 
                 else                  next_state <= st_RINTEXT; -- Senão, continua aquecendo
@@ -116,25 +110,21 @@ begin
                 enab_pow   <= '0';
                 states_out <= "0000001";
                 
-			when st_LOAD =>
-                enab_max_min <= '0';
-                states_out <= "0000010";
-                
             when st_RINTEXT =>
                 enab_max_min <= '0';
                 enab_ext_int <= '1';
                 enab_pow <= '0';
-                states_out <= "0000100";
+                states_out <= "000010";
 
             when st_CALC =>
                 enab_pow <= '1';
-                states_out <= "0001000";
+                states_out <= "000100";
 
-            when st_HEATING => states_out <= "0010000"; 
+            when st_HEATING => states_out <= "001000"; 
 
-            when st_COOLING => states_out <= "0100000";
+            when st_COOLING => states_out <= "010000";
 
-            when st_STABLE  => states_out <= "1000000";
+            when st_STABLE  => states_out <= "100000";
 
             when others =>
                 null;
