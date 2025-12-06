@@ -167,7 +167,7 @@ begin
 
     -- 6. Saídas
     U_ALERT: comparadorAlerta 
-        port map (enab => enab_pow, val => power_final, alerta => alert);
+        port map (enab => enab_pow, vale => power_final, alerta => alert);
 
     -- Conversor Binário para BCD (Decimal)
     U_BIN2BCD: bin_to_bcd 
@@ -178,7 +178,7 @@ begin
         );
     
     -- Displays de 7 segmentos (mostra valores decimais)
-    U_HEX0: decodificador_7seg port map (nibble => bcd_unidade, seg => hex0); -- Unidades
-    U_HEX1: decodificador_7seg port map (nibble => bcd_dezena,  seg => hex1);  -- Dezenas
+    U_HEX1: decodificador_7seg port map (nibble => bcd_unidade, seg => hex0); -- Unidades
+    U_HEX0: decodificador_7seg port map (nibble => bcd_dezena,  seg => hex1);  -- Dezenas
 
 end Structural;

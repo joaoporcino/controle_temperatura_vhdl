@@ -105,7 +105,7 @@ begin
 			   ctrl         => CTRL_CONC,
 
             
-            alert    => led_alert,
+            alert        => led_alert,
             hex0         => hex0,
             hex1         => hex1
         );

@@ -17,7 +17,7 @@ entity controller is
         enab_ext_int : out STD_LOGIC;
         enab_pow : out STD_LOGIC;
         
-        states_out : out STD_LOGIC_VECTOR (3 downto 0)
+        states_out : out STD_LOGIC_VECTOR (6 downto 0)
     );
 end controller;
 
@@ -107,34 +107,34 @@ begin
 	            enab_max_min   <= '0';
                 enab_ext_int   <= '0';
                 enab_pow   <= '0';
-                states_out <= '0000000';
+                states_out <= "0000000";
 
         case present_state is
             when st_RESET =>
                 enab_max_min   <= '1';
                 enab_ext_int   <= '0';
                 enab_pow   <= '0';
-                states_out <= '0000001';
+                states_out <= "0000001";
                 
 			when st_LOAD =>
                 enab_max_min <= '0';
-                states_out <= '0000010';
+                states_out <= "0000010";
                 
             when st_RINTEXT =>
                 enab_max_min <= '0';
                 enab_ext_int <= '1';
                 enab_pow <= '0';
-                states_out <= '0000100';
+                states_out <= "0000100";
 
             when st_CALC =>
                 enab_pow <= '1';
-                states_out <= '0001000';
+                states_out <= "0001000";
 
-            when st_HEATING => states_out <= '0010000';
+            when st_HEATING => states_out <= "0010000"; 
 
-            when st_COOLING => states_out <= '0100000';
+            when st_COOLING => states_out <= "0100000";
 
-            when st_STABLE  => states_out <= '1000000';
+            when st_STABLE  => states_out <= "1000000";
 
             when others =>
                 null;
