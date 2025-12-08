@@ -14,6 +14,5 @@ end comparador_7bits;
 
 architecture Dataflow of comparador_7bits is
 begin
-    -- Corrigido o erro de sintaxe e adicionado o enable
     O <= '1' when (enab = '1' and unsigned(A) > unsigned(B)) else '0';
 end Dataflow;

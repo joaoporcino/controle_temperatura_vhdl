@@ -49,7 +49,7 @@ architecture Structural of datapath is
 	 end component;
     
     component comparadorAlerta is
-        Port ( enab : in STD_LOGIC; val : in STD_LOGIC_VECTOR(6 downto 0); alerta : out STD_LOGIC );
+        Port ( enab : in STD_LOGIC; vale : in STD_LOGIC_VECTOR(6 downto 0); alerta : out STD_LOGIC );
     end component;
     
     component status_decoder is
@@ -82,7 +82,6 @@ architecture Structural of datapath is
         );
     end component;
 
-    -- Sinais Internos
     signal reg_temp_int, reg_temp_ext : STD_LOGIC_VECTOR(6 downto 0);
     signal reg_temp_max, reg_temp_min : STD_LOGIC_VECTOR(6 downto 0);
     
@@ -91,7 +90,6 @@ architecture Structural of datapath is
     signal int_signed     : STD_LOGIC_VECTOR(8 downto 0);
     signal ext_signed     : STD_LOGIC_VECTOR(8 downto 0);
     
-    -- Sinais intermediários da matemática
     signal sub_res_1      : STD_LOGIC_VECTOR(8 downto 0);
     signal sub_res_2      : STD_LOGIC_VECTOR(8 downto 0);
     
@@ -107,13 +105,11 @@ architecture Structural of datapath is
 
 begin
 		
-    -- 1. Registradores
     R_INT: registrador port map (clk=>clk, rst=>rst, en=>enab_ext_int, d_in=>temp_int_min, q_out=>reg_temp_int);
     R_MIN: registrador port map (clk=>clk, rst=>rst, en=>enab_max_min, d_in=>temp_int_min, q_out=>reg_temp_min);
     R_EXT: registrador port map (clk=>clk, rst=>rst, en=>enab_ext_int, d_in=>temp_ext_max, q_out=>reg_temp_ext);
     R_MAX: registrador port map (clk=>clk, rst=>rst, en=>enab_max_min, d_in=>temp_ext_max, q_out=>reg_temp_max);
 
-    -- 2. Comparadores
     COMP_H: comparador_7bits port map (enab => enab_pow, A => reg_temp_min, B => reg_temp_int, O => h_internal);
     COMP_C: comparador_7bits port map (enab => enab_pow,  A=> reg_temp_int, B => reg_temp_max, O => c_internal);
 	 
@@ -123,7 +119,6 @@ begin
     h <= h_internal;
     c <= c_internal;
 
-    -- 3. Matemática
     U_ADD: adder generic map (N => 7) port map (A => reg_temp_max, B => reg_temp_min, Y => sum_max_min);
     avg_res <= "00" & sum_max_min(7 downto 1);
 
@@ -133,13 +128,10 @@ begin
    
     U_SUB1: subtractor generic map (N => 9) port map (A => avg_res, B => int_signed, Y => sub_res_1);
     
-    -- Subtração 2
     U_SUB2: subtractor generic map (N => 9) port map (A => ext_signed, B => int_signed, Y => sub_res_2);
 
-    -- Subtração Final (Pega direto os resultados das subtrações anteriores)
     U_SUB_FIN: subtractor generic map (N => 9) port map (A => sub_res_1, B => sub_res_2, Y => power_calc_raw);
 
-    -- 4. Status Decoder
     U_STATUS_DEC: status_decoder
         port map (
             enable         => enab_pow,
@@ -152,7 +144,6 @@ begin
             pow_h          => pow_h
         );
 
-    -- 5. Magnitude e Final Shift
     U_SUB_NEG: subtractor generic map (N => 9) port map (A => (others=>'0'), B => power_calc_raw, Y => power_neg);
 
     U_FINAL_SHIFT: shifter4 generic map (N => 9, SHIFT_AMT => 2) 
@@ -165,11 +156,9 @@ begin
             clk => clk, rst => rst, en => enab_pow, d_in => power_mag_7bit, q_out => power_final
         );
 
-    -- 6. Saídas
     U_ALERT: comparadorAlerta 
         port map (enab => enab_pow, vale => power_final, alerta => alert);
 
-    -- Conversor Binário para BCD (Decimal)
     U_BIN2BCD: bin_to_bcd 
         port map (
             bin_in  => power_final,
@@ -177,8 +166,7 @@ begin
             unidade => bcd_unidade
         );
     
-    -- Displays de 7 segmentos (mostra valores decimais)
-    U_HEX1: decodificador_7seg port map (nibble => bcd_unidade, seg => hex0); -- Unidades
-    U_HEX0: decodificador_7seg port map (nibble => bcd_dezena,  seg => hex1);  -- Dezenas
+    U_HEX1: decodificador_7seg port map (nibble => bcd_unidade, seg => hex0);
+    U_HEX0: decodificador_7seg port map (nibble => bcd_dezena,  seg => hex1);
 
 end Structural;

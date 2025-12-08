@@ -22,15 +22,12 @@ architecture Behavioral of tb_controle_temperatura is
         );
     end component;
 
-    -- Sinais
     signal clk : STD_LOGIC := '0';
     signal rst : STD_LOGIC := '0';
     
-    -- Inputs
     signal temp_int_min : STD_LOGIC_VECTOR(6 downto 0) := (others => '0');
     signal temp_ext_max : STD_LOGIC_VECTOR(6 downto 0) := (others => '0');
     
-    -- Outputs
     signal states_out : STD_LOGIC_VECTOR(6 downto 0);
     signal motor_pow_c, motor_pow_h : STD_LOGIC;
     signal led_alert : STD_LOGIC;
@@ -63,70 +60,76 @@ begin
         wait;
     end process;
 
-    process begin
-        report "===========================================";
-        report ">>> INICIO DO TESTE CONTROLE DE TEMPERATURA <<<";
-        report "===========================================";
+    process 
+        variable i : integer;
+    begin
+        report "INICIO DO TESTE CONTROLE DE TEMPERATURA";
         
-        report "[1] Configuração Inicial: Reset Ativo...";
+        -- ============================================================
+        -- FASE 1: Max=20, Min=10. Int 120->5. Ext=120.
+        -- ============================================================
+        report ">>> FASE 1: Configurando Max=20, Min=10";
         rst <= '1';
-        
-        -- Configurando valores iniciais
-        temp_int_min <= std_logic_vector(to_unsigned(20, 7));
-        temp_ext_max <= std_logic_vector(to_unsigned(40, 7));
-        
-        wait for 100 ns;
-        
-        report "[1.1] Soltando Reset...";
-        rst <= '0';
-        wait for 200 ns;
-
-        report "[2] Teste: Temp interna=30, externa=30";
-        temp_int_min <= std_logic_vector(to_unsigned(30, 7));
-        temp_ext_max <= std_logic_vector(to_unsigned(30, 7));
-        
-        wait for 800 ns;
-        
-        report "States_out = " & integer'image(to_integer(unsigned(states_out)));
-
-        report "[3] Teste: Temp interna=10, externa=25";
-        temp_int_min <= std_logic_vector(to_unsigned(10, 7));
-        temp_ext_max <= std_logic_vector(to_unsigned(25, 7));
-        wait for 800 ns;
-        
-        report "States_out = " & integer'image(to_integer(unsigned(states_out)));
-
-        report "[4] Teste: Temp interna=35, externa=50";
-        temp_int_min <= std_logic_vector(to_unsigned(35, 7));
-        temp_ext_max <= std_logic_vector(to_unsigned(50, 7));
-        wait for 800 ns;
-        
-        report "States_out = " & integer'image(to_integer(unsigned(states_out)));
-
-        report "[5] RECONFIGURANDO: Reset com novos valores";
-        
-        rst <= '1';
-        
-        temp_int_min <= std_logic_vector(to_unsigned(50, 7));
-        temp_ext_max <= std_logic_vector(to_unsigned(60, 7));
-        
-        wait for 100 ns;
-        
-        rst <= '0';
+        temp_int_min <= std_logic_vector(to_unsigned(10, 7)); -- Min
+        temp_ext_max <= std_logic_vector(to_unsigned(20, 7)); -- Max
         wait for 200 ns;
         
-        report "[5.1] Testando com novos valores: Temp=55";
+        report ">>> FASE 1: Iniciando varredura Temp Interna (120 downto 5)";
+        rst <= '0';
+        wait for 20 ns;
+        temp_ext_max <= std_logic_vector(to_unsigned(120, 7)); -- Ext fixa em 120
         
-        temp_int_min <= std_logic_vector(to_unsigned(55, 7));
-        temp_ext_max <= std_logic_vector(to_unsigned(55, 7));
-        
-        wait for 800 ns;
-        
-        report "States_out = " & integer'image(to_integer(unsigned(states_out)));
+        for i in 24 downto 1 loop -- 120 down to 5 step 5. (24*5=120, 1*5=5)
+            temp_int_min <= std_logic_vector(to_unsigned(i * 5, 7));
+            wait for 200 ns;
+            report "Fase 1: Int=" & integer'image(i*5) & ", Ext=120. States=" & integer'image(to_integer(unsigned(states_out)));
+        end loop;
 
-        report "===========================================";
-        report ">>> SUCESSO: TESTE FINALIZADO <<<";
-        report "===========================================";
+        -- ============================================================
+        -- FASE 2: Int=5. Ext 120->5.
+        -- ============================================================
+        report ">>> FASE 2: Iniciando varredura Temp Externa (120 downto 5)";
+        temp_int_min <= std_logic_vector(to_unsigned(5, 7)); -- Int fixa em 5
+        
+        for i in 24 downto 1 loop
+            temp_ext_max <= std_logic_vector(to_unsigned(i * 5, 7));
+            wait for 200 ns;
+            report "Fase 2: Int=5, Ext=" & integer'image(i*5) & ". States=" & integer'image(to_integer(unsigned(states_out)));
+        end loop;
+
+        -- ============================================================
+        -- FASE 3: Reset. Max=120, Min=110. Int 10->115. Ext=10.
+        -- ============================================================
+        report ">>> FASE 3: Resetando. Configurando Max=120, Min=110";
+        rst <= '1';
+        temp_int_min <= std_logic_vector(to_unsigned(110, 7)); -- Min
+        temp_ext_max <= std_logic_vector(to_unsigned(120, 7)); -- Max
+        wait for 200 ns;
+        
+        report ">>> FASE 3: Iniciando varredura Temp Interna (10 a 115)";
+        rst <= '0';
+        wait for 20 ns;
+        temp_ext_max <= std_logic_vector(to_unsigned(10, 7)); -- Ext fixa em 10
+        
+        for i in 2 to 23 loop -- 10 to 115 step 5. (2*5=10, 23*5=115)
+            temp_int_min <= std_logic_vector(to_unsigned(i * 5, 7));
+            wait for 200 ns;
+            report "Fase 3: Int=" & integer'image(i*5) & ", Ext=10. States=" & integer'image(to_integer(unsigned(states_out)));
+        end loop;
+
+        -- ============================================================
+        -- FASE 4: Int=115. Ext 10->115.
+        -- ============================================================
+        report ">>> FASE 4: Iniciando varredura Temp Externa (10 a 115)";
+        temp_int_min <= std_logic_vector(to_unsigned(115, 7)); -- Int fixa em 115
+        
+        for i in 2 to 23 loop
+            temp_ext_max <= std_logic_vector(to_unsigned(i * 5, 7));
+            wait for 200 ns;
+            report "Fase 4: Int=115, Ext=" & integer'image(i*5) & ". States=" & integer'image(to_integer(unsigned(states_out)));
+        end loop;
+
+        report "SUCESSO: TESTE FINALIZADO";
         sim_ended <= true;
         wait;
     end process;

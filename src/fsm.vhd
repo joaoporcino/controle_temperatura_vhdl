@@ -5,15 +5,13 @@ entity controller is
     Port (
         clk      : in  STD_LOGIC;
         rst      : in  STD_LOGIC;
-        control  : in  STD_LOGIC; -- Funciona como um "Start/Enable System"
+        control  : in  STD_LOGIC;
         
-        -- Flags vindas do Datapath
-        c : in std_logic; -- Flag Cool (Resfriar)
-        h : in std_logic; -- Flag Heat (Aquecer)
-        s : in std_logic; -- Flag Stable (Estável)
+        c : in std_logic; 
+        h : in std_logic; 
+        s : in std_logic;
 
-        -- Saídas de Controle para o Datapath (Enables)
-        enab_max_min : out STD_LOGIC;
+		enab_max_min : out STD_LOGIC;
         enab_ext_int : out STD_LOGIC;
         enab_pow : out STD_LOGIC;
         
@@ -23,21 +21,19 @@ end controller;
 
 architecture Behavioral of controller is
 
-    -- Definição dos Estados (Total: 7 estados listados na sua type)
     type state_type is (
         st_RESET, 
-        st_RINTEXT,   -- Lê sensores Interno/Externo
-        st_CALC,      -- Habilita cálculo de potência e verifica flags
-        st_COOLING,   -- Estado de resfriamento
-        st_HEATING,   -- Estado de aquecimento
-        st_STABLE     -- Estado estável
+        st_RINTEXT,
+        st_CALC,
+        st_COOLING,
+        st_HEATING,
+        st_STABLE
     );
 
     signal present_state, next_state : state_type;
 
 begin
 
-    -- PROCESSO 1: Memória de Estado (Sequencial)
     sync_proc: process(clk, rst)
     begin
         if rst = '1' then
@@ -47,10 +43,8 @@ begin
         end if;
     end process;
 
-    -- PROCESSO 2: Lógica de Próximo Estado (Combinacional)
     next_state_proc: process(present_state, control, h, c, s)
     begin
-        -- Valor padrão para manter o estado caso nenhuma condição seja satisfeita
         next_state <= present_state;
 
         case present_state is
@@ -77,7 +71,7 @@ begin
 
            when st_HEATING =>
                 if control = '0' then next_state <= st_RESET; 
-                else                  next_state <= st_RINTEXT; -- Senão, continua aquecendo
+                else                  next_state <= st_RINTEXT;
                 end if;
 
             when st_COOLING =>
@@ -95,7 +89,6 @@ begin
         end case;
     end process;
 
-    -- PROCESSO 3: Lógica de Saída (Combinacional)
     output_proc: process(present_state)
     begin
 	            enab_max_min   <= '0';
@@ -114,17 +107,17 @@ begin
                 enab_max_min <= '0';
                 enab_ext_int <= '1';
                 enab_pow <= '0';
-                states_out <= "000010";
+                states_out <= "0000010";
 
             when st_CALC =>
                 enab_pow <= '1';
-                states_out <= "000100";
+                states_out <= "0000100";
 
-            when st_HEATING => states_out <= "001000"; 
+            when st_HEATING => states_out <= "0001000"; 
 
-            when st_COOLING => states_out <= "010000";
+            when st_COOLING => states_out <= "0010000";
 
-            when st_STABLE  => states_out <= "100000";
+            when st_STABLE  => states_out <= "0100000";
 
             when others =>
                 null;

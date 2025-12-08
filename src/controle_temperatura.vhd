@@ -6,18 +6,15 @@ entity controle_temperatura is
         clk_sys : in  STD_LOGIC;
         rst       : in  STD_LOGIC;
         
-        -- Entradas
         temp_int_min : in STD_LOGIC_VECTOR(6 downto 0);
         temp_ext_max : in STD_LOGIC_VECTOR(6 downto 0);
 
-        -- Saídas Visuais (LEDs de Estado)
         states_out : out STD_LOGIC_VECTOR (6 downto 0);
         
-        motor_pow_c : out STD_LOGIC; -- Sinal de força para Resfriar
-        motor_pow_h : out STD_LOGIC; -- Sinal de força para Aquecer
-		  led_alert   : out STD_LOGIC;
+        motor_pow_c : out STD_LOGIC;
+        motor_pow_h : out STD_LOGIC;
+		led_alert   : out STD_LOGIC;
         
-        -- Displays
         hex0       : out STD_LOGIC_VECTOR(6 downto 0);
         hex1       : out STD_LOGIC_VECTOR(6 downto 0)
     );
@@ -62,13 +59,11 @@ architecture Structural of controle_temperatura is
         );
 	end component;
 	 
-    -- Fios de Controle
     signal w_enab_max_min : STD_LOGIC;
     signal w_enab_ext_int : STD_LOGIC;
     signal w_enab_pow: STD_LOGIC;
 	signal CTRL_CONC : STD_LOGIC;
 
-    -- Fios de Flags
     signal w_flag_c, w_flag_h, w_flag_s : STD_LOGIC;
 
 begin
@@ -102,7 +97,7 @@ begin
 
             pow_c        => motor_pow_c, 
             pow_h        => motor_pow_h,
-			   ctrl         => CTRL_CONC,
+			ctrl         => CTRL_CONC,
 
             
             alert        => led_alert,

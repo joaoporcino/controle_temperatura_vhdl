@@ -114,11 +114,11 @@ begin
             
             -- Verificar se corresponde a ACTIVE LOW ou ACTIVE HIGH
             if seg_tb = EXPECTED_PATTERNS_LOW(i) then
-                report "  ✓ CORRETO (ACTIVE LOW)";
+                report "  OK CORRETO (ACTIVE LOW)";
             elsif seg_tb = EXPECTED_PATTERNS_HIGH(i) then
-                report "  ✓ CORRETO (ACTIVE HIGH)";
+                report "  OK CORRETO (ACTIVE HIGH)";
             else
-                report "  ✗ ERRO: Padrão não corresponde a nenhum esperado!" 
+                report "  ERRO: Padrao nao corresponde a nenhum esperado!" 
                     severity error;
             end if;
             report "";
@@ -133,28 +133,28 @@ begin
         report "======================================";
         
         -- Teste de transição rápida
-        report "Teste: Transições rápidas";
+        report "Teste: Transicoes rapidas";
         nibble_tb <= "0000"; wait for WAIT_TIME;
         nibble_tb <= "1111"; wait for WAIT_TIME;
         nibble_tb <= "0101"; wait for WAIT_TIME;
         nibble_tb <= "1010"; wait for WAIT_TIME;
-        report "  ✓ Transições rápidas OK";
+        report "  Transicoes rapidas OK";
         report "";
         
         -- Teste de sequência incremental
-        report "Teste: Sequência 0-9 (dígitos decimais)";
+        report "Teste: Sequencia 0-9 (digitos decimais)";
         for i in 0 to 9 loop
             nibble_tb <= std_logic_vector(to_unsigned(i, 4));
             wait for WAIT_TIME/2;
         end loop;
-        report "  ✓ Sequência decimal OK";
+        report "  Sequencia decimal OK";
         report "";
         
         -- ========================================
         -- FIM DOS TESTES
         -- ========================================
         report "======================================";
-        report "TODOS OS TESTES CONCLUÍDOS!";
+        report "TODOS OS TESTES CONCLUIDOS!";
         report "======================================";
         report "NOTA: Verifique se o decodificador usa ACTIVE LOW";
         report "      ou ACTIVE HIGH conforme sua placa FPGA.";
