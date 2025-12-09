@@ -12,19 +12,23 @@ ENTITY bin_to_bcd IS
 END bin_to_bcd;
 
 ARCHITECTURE Behavioral OF bin_to_bcd IS
-    SIGNAL bin_unsigned : unsigned(6 DOWNTO 0);
-    SIGNAL dezena_temp : unsigned(6 DOWNTO 0);
-    SIGNAL unidade_temp : unsigned(6 DOWNTO 0);
 BEGIN
-    IF enable = 1 THEN
-        bin_unsigned <= unsigned(bin_in);
-
-        dezena_temp <= bin_unsigned / 10;
-
-        unidade_temp <= bin_unsigned MOD 10;
-
-        dezena <= STD_LOGIC_VECTOR(dezena_temp(3 DOWNTO 0));
-        unidade <= STD_LOGIC_VECTOR(unidade_temp(3 DOWNTO 0));
-    END IF;
+    PROCESS(enable, bin_in)
+        VARIABLE bin_unsigned : unsigned(6 DOWNTO 0);
+        VARIABLE dezena_value : unsigned(3 DOWNTO 0);
+        VARIABLE unidade_value : unsigned(3 DOWNTO 0);
+    BEGIN
+        IF enable = '1' THEN
+            bin_unsigned := unsigned(bin_in);
+            dezena_value := bin_unsigned / 10;
+            unidade_value := bin_unsigned MOD 10;
+            
+            dezena <= STD_LOGIC_VECTOR(dezena_value);
+            unidade <= STD_LOGIC_VECTOR(unidade_value);
+        ELSE
+            dezena <= (others => '0');
+            unidade <= (others => '0');
+        END IF;
+    END PROCESS;
 
 END Behavioral;
