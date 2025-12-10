@@ -12,7 +12,6 @@ architecture Behavioral of tb_C is
             A : in STD_LOGIC_VECTOR(6 downto 0);
             B : in STD_LOGIC_VECTOR(6 downto 0);
             O : out STD_LOGIC
-
         );
     end component;
     
@@ -34,7 +33,6 @@ begin
     begin
         enab_tb <= '1';
         
-        -- Teste 1: A > B (100 > 20) -> O=1
         input_a_tb <= std_logic_vector(to_unsigned(100, 7));
         input_b_tb <= std_logic_vector(to_unsigned(20, 7));
         wait for PERIOD;

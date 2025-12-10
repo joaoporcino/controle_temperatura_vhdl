@@ -1,10 +1,10 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity tb_cool_control is
-end tb_cool_control;
+entity tb_cooling is
+end tb_cooling;
 
-architecture Behavioral of tb_cool_control is
+architecture Behavioral of tb_cooling is
     component cool_control
         Port ( 
             clk     : in STD_LOGIC;
@@ -23,7 +23,7 @@ architecture Behavioral of tb_cool_control is
     signal cool_tb   : STD_LOGIC;
     
     constant CLK_PERIOD : time := 10 ns;
-    signal sim_ended : boolean := false;  -- Controle de parada
+    signal sim_ended : boolean := false; 
     
 begin
     uut: cool_control port map (
@@ -51,60 +51,44 @@ begin
         read_tb <= '1';
         wait for CLK_PERIOD/2;
         
-        -- TESTE 1: Condição ativa (c=1, proc=1, read=0)
-        report "Teste 1: cool = 1 AND 1 AND NOT 0 = 1";
         c_tb <= '1';
         proc_tb <= '1';
         read_tb <= '0';
         wait for CLK_PERIOD;
         assert cool_tb = '1' report "ERRO: cool deveria ser 1" severity error;
         
-        -- TESTE 2: Condição inativa (read=1)
-        report "Teste 2: cool = 1 AND 1 AND NOT 1 = 0";
         c_tb <= '1';
         proc_tb <= '1';
         read_tb <= '1';
         wait for CLK_PERIOD;
         assert cool_tb = '0' report "ERRO: cool deveria ser 0" severity error;
         
-        -- TESTE 3: Condição inativa (c=0)
-        report "Teste 3: cool = 0 AND 1 AND NOT 0 = 0";
         c_tb <= '0';
         proc_tb <= '1';
         read_tb <= '0';
         wait for CLK_PERIOD;
         assert cool_tb = '0' report "ERRO: cool deveria ser 0" severity error;
         
-        -- TESTE 4: Condição inativa (proc=0)
-        report "Teste 4: cool = 1 AND 0 AND NOT 0 = 0";
         c_tb <= '1';
         proc_tb <= '0';
         read_tb <= '0';
         wait for CLK_PERIOD;
         assert cool_tb = '0' report "ERRO: cool deveria ser 0" severity error;
         
-        -- TESTE 5: Transições rápidas
-        report "Teste 5: Transições rápidas";
-        
-        -- Clock 1
         c_tb <= '1'; proc_tb <= '1'; read_tb <= '0';
         wait for CLK_PERIOD;
         assert cool_tb = '1' report "ERRO: Transição 1" severity error;
         
-        -- Clock 2
         c_tb <= '1'; proc_tb <= '1'; read_tb <= '1';
         wait for CLK_PERIOD;
         assert cool_tb = '0' report "ERRO: Transição 2" severity error;
         
-        -- Clock 3
         c_tb <= '1'; proc_tb <= '1'; read_tb <= '0';
         wait for CLK_PERIOD;
         assert cool_tb = '1' report "ERRO: Transição 3" severity error;
         
-        -- TESTE 6: Reset durante operação
-        report "Teste 6: Reset durante operação";
         c_tb <= '1'; proc_tb <= '1'; read_tb <= '0';
-        wait for CLK_PERIOD/2;  -- Meio período
+        wait for CLK_PERIOD/2; 
         reset_tb <= '1';
         wait for CLK_PERIOD/2;
         assert cool_tb = '0' report "ERRO: Reset não funcionou" severity error;

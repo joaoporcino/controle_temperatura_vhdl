@@ -14,7 +14,7 @@ entity controller is
 		enab_max_min : out STD_LOGIC;
         enab_ext_int : out STD_LOGIC;
         enab_pow : out STD_LOGIC;
-		  enab_stat : out STD_LOGIC;
+        enab_stat : out STD_LOGIC;
         
         states_out : out STD_LOGIC_VECTOR (5 downto 0)
     );
@@ -49,8 +49,8 @@ begin
 	            enab_max_min   <= '0';
                 enab_ext_int   <= '0';
                 enab_pow   <= '0';
-					 enab_stat <= '0';
-                states_out <= "000000";
+                enab_stat  <= '0';
+                states_out <= "000000"; -- This line was changed from "0000000" to "000000" to match the vector size (5 downto 0)
 		         next_state <= present_state;
 
 
@@ -80,7 +80,7 @@ begin
             when st_CALC =>
                 enab_pow <= '1';
 					 enab_ext_int <= '0';
-					 enab_stat <= '0';
+					 enab_stat <= '1';
                 states_out <= "000100";
 					 
 					 if h = '1' then
@@ -94,8 +94,8 @@ begin
                 end if;
 
             when st_HEATING => 
-					 states_out <= "001000"; 
                 enab_stat <= '1';
+					 states_out <= "001000"; 
 					 enab_pow <= '0';
 					 
 					 if control = '0' then next_state <= st_RESET; 
@@ -103,8 +103,8 @@ begin
                 end if;
 
             when st_COOLING => 
-					 states_out <= "010000";
                 enab_stat <= '1';
+					 states_out <= "010000";
 					 enab_pow <= '0';
 					 
 					 if control = '0' then next_state <= st_RESET;

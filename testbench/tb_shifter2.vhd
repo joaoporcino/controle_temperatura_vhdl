@@ -7,9 +7,6 @@ end tb_shifter2;
 
 architecture Behavioral of tb_shifter2 is
 
-    -- O VHDL vai buscar direto na biblioteca 'work'
-
-    -- Definimos o tamanho aqui APENAS para criar os fios do teste
     constant N_TB : integer := 9; 
 
     signal s_Din  : STD_LOGIC_VECTOR (N_TB-1 downto 0) := (others => '0');
@@ -27,23 +24,15 @@ begin
 
     stim_proc: process
     begin
-        ------------------------------------------------------------
-        -- Caso 1: 100 / 4 = 25
-        ------------------------------------------------------------
         s_Din <= std_logic_vector(to_signed(100, N_TB));
         wait for WAIT_TIME;
         
         s_Din <= std_logic_vector(to_signed(16, N_TB));
         wait for WAIT_TIME;
 
-        ------------------------------------------------------------
-        ------------------------------------------------------------
         s_Din <= std_logic_vector(to_signed(-100, N_TB));
         wait for WAIT_TIME;
         
-
-        ------------------------------------------------------------
-        ------------------------------------------------------------
         s_Din <= std_logic_vector(to_signed(-16, N_TB));
         wait for WAIT_TIME;
         

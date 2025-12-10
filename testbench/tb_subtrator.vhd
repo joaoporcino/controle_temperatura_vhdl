@@ -29,25 +29,21 @@ begin
 
     stimulus: process
     begin
-        -- Teste 1: Subtração Positiva (50 - 20 = 30)
         A_tb <= std_logic_vector(to_signed(50, N_BITS));
         B_tb <= std_logic_vector(to_signed(20, N_BITS));
         wait for PERIOD;
         assert to_integer(signed(Y_tb)) = 30 report "Erro 50-20" severity error;
 
-        -- Teste 2: Subtração Negativa (20 - 50 = -30)
         A_tb <= std_logic_vector(to_signed(20, N_BITS));
         B_tb <= std_logic_vector(to_signed(50, N_BITS));
         wait for PERIOD;
         assert to_integer(signed(Y_tb)) = -30 report "Erro 20-50" severity error;
 
-        -- Teste 3: Subtração com Zero (100 - 0 = 100)
         A_tb <= std_logic_vector(to_signed(100, N_BITS));
         B_tb <= (others => '0');
         wait for PERIOD;
         assert to_integer(signed(Y_tb)) = 100 report "Erro 100-0" severity error;
 
-        -- Teste 4: Subtração Resultando em Zero (42 - 42 = 0)
         A_tb <= std_logic_vector(to_signed(42, N_BITS));
         B_tb <= std_logic_vector(to_signed(42, N_BITS));
         wait for PERIOD;

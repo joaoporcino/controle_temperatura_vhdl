@@ -33,31 +33,26 @@ begin
     begin
         enab_tb <= '1';
         
-        -- Teste 1: A > B (100 > 20) -> O=1
         input_a_tb <= std_logic_vector(to_unsigned(100, 7));
         input_b_tb <= std_logic_vector(to_unsigned(20, 7));
         wait for PERIOD;
-        assert equal_out_tb = '1' report "Erro Teste 1: 100 > 20 deve ser 1" severity error;
+        assert equal_out_tb = '1' report "Erro Teste 1" severity error;
         
-        -- Teste 2: A < B (20 < 100) -> O=0
         input_a_tb <= std_logic_vector(to_unsigned(20, 7));
         input_b_tb <= std_logic_vector(to_unsigned(100, 7));
         wait for PERIOD;
-        assert equal_out_tb = '0' report "Erro Teste 2: 20 > 100 deve ser 0" severity error;
+        assert equal_out_tb = '0' report "Erro Teste 2" severity error;
         
-        -- Teste 3: A = B (50 = 50) -> O=0 (Estritamente maior?)
-        -- O codigo diz: O <= '1' when (enab = '1' and unsigned(A) > unsigned(B)) else '0';
         input_a_tb <= std_logic_vector(to_unsigned(50, 7));
         input_b_tb <= std_logic_vector(to_unsigned(50, 7));
         wait for PERIOD;
-        assert equal_out_tb = '0' report "Erro Teste 3: 50 > 50 deve ser 0" severity error;
+        assert equal_out_tb = '0' report "Erro Teste 3" severity error;
         
-        -- Teste 4: Enable = 0
         enab_tb <= '0';
         input_a_tb <= std_logic_vector(to_unsigned(100, 7));
         input_b_tb <= std_logic_vector(to_unsigned(20, 7));
         wait for PERIOD;
-        assert equal_out_tb = '0' report "Erro Teste 4: Enable=0 deve ser 0" severity error;
+        assert equal_out_tb = '0' report "Erro Teste 4" severity error;
         
         wait;
     end process;

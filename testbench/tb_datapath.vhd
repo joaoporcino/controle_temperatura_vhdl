@@ -16,6 +16,7 @@ architecture Behavioral of tb_datapath is
             enab_max_min: in STD_LOGIC;
             enab_ext_int : in STD_LOGIC;
             enab_pow : in STD_LOGIC;
+            enab_stat : in STD_LOGIC;
             c : out STD_LOGIC;
             h : out STD_LOGIC;
             s : out STD_LOGIC;
@@ -28,7 +29,6 @@ architecture Behavioral of tb_datapath is
         );
     end component;
     
-    -- Sinais de teste
     signal clk_tb      : STD_LOGIC := '0';
     signal rst_tb      : STD_LOGIC := '1';
     signal temp_int_min_tb : STD_LOGIC_VECTOR(6 downto 0) := (others => '0');
@@ -36,6 +36,7 @@ architecture Behavioral of tb_datapath is
     signal enab_max_min_tb   : STD_LOGIC := '0';
     signal enab_ext_int_tb   : STD_LOGIC := '0';
     signal enab_pow_tb   : STD_LOGIC := '0';
+    signal enab_stat_tb  : STD_LOGIC := '0';
     
     signal c_tb : STD_LOGIC;
     signal h_tb : STD_LOGIC;
@@ -52,7 +53,6 @@ architecture Behavioral of tb_datapath is
     
 begin
     
-    -- Instância do datapath
     uut: datapath
         port map (
             clk          => clk_tb,
@@ -62,6 +62,7 @@ begin
             enab_max_min => enab_max_min_tb,
             enab_ext_int => enab_ext_int_tb,
             enab_pow     => enab_pow_tb,
+            enab_stat    => enab_stat_tb,
             c            => c_tb,
             h            => h_tb,
             s            => s_tb,
@@ -73,7 +74,6 @@ begin
             hex1         => hex1_tb
         );
     
-    -- Gerador de clock
     clk_process: process
     begin
         while not sim_ended loop
@@ -85,121 +85,68 @@ begin
         wait;
     end process;
     
-    -- Processo de estímulo
     stimulus: process
     begin
         
-        report "======================================";
-        report "TESTBENCH DO DATAPATH";
-        report "======================================";
-        report "";
-        
-        -- ========================================
-        -- TESTE 1: Reset
-        -- ========================================
-        report "TESTE 1: Aplicando RESET";
         rst_tb <= '1';
         wait for CLK_PERIOD * 3;
         rst_tb <= '0';
         wait for CLK_PERIOD;
         
-        -- ========================================
-        -- TESTE 2: Carregar valores mín/máx
-        -- ========================================
-        report "TESTE 2: Carregando temperaturas mín/máx";
-        temp_int_min_tb <= std_logic_vector(to_unsigned(20, 7)); -- min = 20
-        temp_ext_max_tb <= std_logic_vector(to_unsigned(80, 7)); -- max = 80
+        temp_int_min_tb <= std_logic_vector(to_unsigned(20, 7)); 
+        temp_ext_max_tb <= std_logic_vector(to_unsigned(80, 7)); 
         enab_max_min_tb <= '1';
         wait for CLK_PERIOD * 2;
         enab_max_min_tb <= '0';
-        report "  Carregado: min=20, max=80";
-        report "";
         
-        -- ========================================
-        -- TESTE 3: Temperatura baixa (precisa aquecer)
-        -- ========================================
-        report "TESTE 3: Temperatura baixa (temp_int=15, precisa aquecer)";
-        temp_int_min_tb <= std_logic_vector(to_unsigned(15, 7)); -- int = 15
-        temp_ext_max_tb <= std_logic_vector(to_unsigned(10, 7)); -- ext = 10 (irrelevante aqui)
+        temp_int_min_tb <= std_logic_vector(to_unsigned(15, 7)); 
+        temp_ext_max_tb <= std_logic_vector(to_unsigned(10, 7)); 
         enab_ext_int_tb <= '1';
         wait for CLK_PERIOD * 2;
         enab_ext_int_tb <= '0';
         
-        -- Calcular potência (flags sao geradas aqui tambem)
         enab_pow_tb <= '1';
+        enab_stat_tb <= '1';
         wait for CLK_PERIOD * 3;
         
-        report "  Flags geradas:";
-        report "    h (heat)   = " & std_logic'image(h_tb);
-        report "    c (cool)   = " & std_logic'image(c_tb);
-        report "    s (stable) = " & std_logic'image(s_tb);
         assert h_tb = '1' report "ERRO: Flag H deveria estar ativa (temp < min)" severity error;
         assert c_tb = '0' report "ERRO: Flag C deveria estar inativa" severity error;
         
         enab_pow_tb <= '0';
-        report "";
+        enab_stat_tb <= '0';
         
-        -- ========================================
-        -- TESTE 4: Temperatura alta (precisa resfriar)
-        -- ========================================
-        report "TESTE 4: Temperatura alta (temp_int=85, precisa resfriar)";
-        temp_int_min_tb <= std_logic_vector(to_unsigned(85, 7)); -- int = 85
-        temp_ext_max_tb <= std_logic_vector(to_unsigned(90, 7)); -- ext = 90
+        temp_int_min_tb <= std_logic_vector(to_unsigned(85, 7)); 
+        temp_ext_max_tb <= std_logic_vector(to_unsigned(90, 7)); 
         enab_ext_int_tb <= '1';
         wait for CLK_PERIOD * 2;
         enab_ext_int_tb <= '0';
         
         enab_pow_tb <= '1';
+        enab_stat_tb <= '1';
         wait for CLK_PERIOD * 3;
         
-        report "  Flags geradas:";
-        report "    h (heat)   = " & std_logic'image(h_tb);
-        report "    c (cool)   = " & std_logic'image(c_tb);
-        report "    s (stable) = " & std_logic'image(s_tb);
         assert c_tb = '1' report "ERRO: Flag C deveria estar ativa (temp > max)" severity error;
         assert h_tb = '0' report "ERRO: Flag H deveria estar inativa" severity error;
         
         enab_pow_tb <= '0';
-        report "";
+        enab_stat_tb <= '0';
         
-        -- ========================================
-        -- TESTE 5: Temperatura estável
-        -- ========================================
-        report "TESTE 5: Temperatura estável (temp_int=50, dentro da faixa)";
-        temp_int_min_tb <= std_logic_vector(to_unsigned(50, 7)); -- int = 50
-        temp_ext_max_tb <= std_logic_vector(to_unsigned(50, 7)); -- ext = 50
+        temp_int_min_tb <= std_logic_vector(to_unsigned(50, 7)); 
+        temp_ext_max_tb <= std_logic_vector(to_unsigned(50, 7)); 
         enab_ext_int_tb <= '1';
         wait for CLK_PERIOD * 2;
         enab_ext_int_tb <= '0';
         
         enab_pow_tb <= '1';
+        enab_stat_tb <= '1';
         wait for CLK_PERIOD * 3;
         
-        report "  Flags geradas:";
-        report "    h (heat)   = " & std_logic'image(h_tb);
-        report "    c (cool)   = " & std_logic'image(c_tb);
-        report "    s (stable) = " & std_logic'image(s_tb);
         assert s_tb = '1' report "ERRO: Flag S deveria estar ativa (temperatura OK)" severity error;
         assert h_tb = '0' report "ERRO: Flag H deveria estar inativa" severity error;
         assert c_tb = '0' report "ERRO: Flag C deveria estar inativa" severity error;
         
         enab_pow_tb <= '0';
-        report "";
-        
-        -- ========================================
-        -- TESTE 6: Verificar status decoder (direção dos motores)
-        -- ========================================
-        report "TESTE 6: Verificando sinais de direção dos motores";
-        report "  pow_h (motor aquecimento) = " & std_logic'image(pow_h_tb);
-        report "  pow_c (motor resfriamento) = " & std_logic'image(pow_c_tb);
-        report "";
-        
-        -- ========================================
-        -- FIM DOS TESTES
-        -- ========================================
-        report "======================================";
-        report "TODOS OS TESTES DO DATAPATH CONCLUIDOS!";
-        report "======================================";
+        enab_stat_tb <= '0';
         
         sim_ended <= true;
         wait;
