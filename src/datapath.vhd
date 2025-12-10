@@ -11,6 +11,7 @@ entity datapath is
         enab_max_min: in STD_LOGIC;
         enab_ext_int : in STD_LOGIC;
         enab_pow : in STD_LOGIC; 
+		  enab_stat : in STD_LOGIC;
         c : out STD_LOGIC;
         h : out STD_LOGIC;
         s : out STD_LOGIC;
@@ -73,9 +74,18 @@ architecture Structural of datapath is
     component decodificador_7seg is
         Port ( nibble : in STD_LOGIC_VECTOR (3 downto 0); seg : out STD_LOGIC_VECTOR (6 downto 0));
     end component;
+	 
+	 component ch is 
+	     Port (
+        sinal_input     : in  STD_LOGIC;
+        enable          : in  STD_LOGIC;
+		  enab            : in std_LOGIC;
+        sinal_output    : out STD_LOGIC);
+	 end component;
 
     component bin_to_bcd is
         Port (
+				enable  : in std_LOGIC;
             bin_in  : in  STD_LOGIC_VECTOR(6 downto 0);
             dezena  : out STD_LOGIC_VECTOR(3 downto 0);
             unidade : out STD_LOGIC_VECTOR(3 downto 0)
@@ -115,9 +125,9 @@ begin
 	 
 	 
     U_CONTROL_DEC: control_decoder port map ( reset => rst, not_reset => ctrl);
-    
-    h <= h_internal;
-    c <= c_internal;
+	 
+	 U_C: ch port map ( sinal_input => c_internal, enable => enab_pow, enab => enab_stat, sinal_output => c);
+	 U_H: ch port map ( sinal_input => h_internal, enable => enab_pow, enab => enab_stat, sinal_output => h);
 
     U_ADD: adder generic map (N => 7) port map (A => reg_temp_max, B => reg_temp_min, Y => sum_max_min);
     avg_res <= "00" & sum_max_min(7 downto 1);
@@ -157,11 +167,12 @@ begin
         );
 
     U_ALERT: comparadorAlerta 
-        port map (enab => enab_pow, vale => power_final, alerta => alert);
+        port map (enab => enab_stat, vale => power_mag_7bit, alerta => alert);
 
     U_BIN2BCD: bin_to_bcd 
         port map (
-            bin_in  => power_final,
+				enable  => enab_stat,
+            bin_in  => power_mag_7bit,
             dezena  => bcd_dezena,
             unidade => bcd_unidade
         );

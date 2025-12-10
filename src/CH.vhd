@@ -5,6 +5,7 @@ entity CH is
     Port (
         sinal_input     : in  STD_LOGIC;
         enable          : in  STD_LOGIC;
+		  enab            : in  STD_LOGIC;
         sinal_output    : out STD_LOGIC
     );
 end CH;

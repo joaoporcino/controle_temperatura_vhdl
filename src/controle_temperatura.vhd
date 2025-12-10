@@ -9,7 +9,7 @@ entity controle_temperatura is
         temp_int_min : in STD_LOGIC_VECTOR(6 downto 0);
         temp_ext_max : in STD_LOGIC_VECTOR(6 downto 0);
 
-        states_out : out STD_LOGIC_VECTOR (6 downto 0);
+        states_out : out STD_LOGIC_VECTOR (5 downto 0);
         
         motor_pow_c : out STD_LOGIC;
         motor_pow_h : out STD_LOGIC;
@@ -33,6 +33,7 @@ architecture Structural of controle_temperatura is
         enab_max_min : out STD_LOGIC;
         enab_ext_int : out STD_LOGIC;
         enab_pow : out STD_LOGIC;
+		  enab_stat : out STD_LOGIC;
 		  led_alert : out STD_LOGIC;
         states_out : out STD_LOGIC_VECTOR (6 downto 0)
 		); 
@@ -47,6 +48,7 @@ architecture Structural of controle_temperatura is
         enab_max_min: in STD_LOGIC;
         enab_ext_int : in STD_LOGIC;
         enab_pow : in STD_LOGIC;
+		  enab_stat : in STD_LOGIC;
         c : out STD_LOGIC;
         h : out STD_LOGIC;
         s : out STD_LOGIC;
@@ -62,6 +64,7 @@ architecture Structural of controle_temperatura is
     signal w_enab_max_min : STD_LOGIC;
     signal w_enab_ext_int : STD_LOGIC;
     signal w_enab_pow: STD_LOGIC;
+    signal w_enab_stat: STD_LOGIC;
 	signal CTRL_CONC : STD_LOGIC;
 
     signal w_flag_c, w_flag_h, w_flag_s : STD_LOGIC;
@@ -79,6 +82,7 @@ begin
             enab_max_min  => w_enab_max_min,
             enab_ext_int  => w_enab_ext_int,
             enab_pow   => w_enab_pow,
+				enab_stat => w_enab_stat,
             states_out => states_out
         );
 
@@ -91,6 +95,7 @@ begin
             enab_max_min  => w_enab_max_min,
             enab_ext_int  => w_enab_ext_int,
             enab_pow      => w_enab_pow,
+				enab_stat     => w_enab_stat,
             c            => w_flag_c,
             h            => w_flag_h,
             s            => w_flag_s,

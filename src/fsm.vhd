@@ -14,8 +14,9 @@ entity controller is
 		enab_max_min : out STD_LOGIC;
         enab_ext_int : out STD_LOGIC;
         enab_pow : out STD_LOGIC;
+		  enab_stat : out STD_LOGIC;
         
-        states_out : out STD_LOGIC_VECTOR (6 downto 0)
+        states_out : out STD_LOGIC_VECTOR (5 downto 0)
     );
 end controller;
 
@@ -43,23 +44,46 @@ begin
         end if;
     end process;
 
-    next_state_proc: process(present_state, control, h, c, s)
+    output_proc: process(present_state)
     begin
-        next_state <= present_state;
+	            enab_max_min   <= '0';
+                enab_ext_int   <= '0';
+                enab_pow   <= '0';
+					 enab_stat <= '0';
+                states_out <= "000000";
+		         next_state <= present_state;
+
 
         case present_state is
             when st_RESET =>
-                if control = '1' then
+                enab_max_min   <= '1';
+                enab_ext_int   <= '0';
+                enab_pow   <= '0';
+					 enab_stat <= '0';
+                states_out <= "000001";
+					 
+					 if control = '1' then
                     next_state <= st_RINTEXT;
                 else
                     next_state <= st_RESET;
                 end if;
-
+                
             when st_RINTEXT =>
-                next_state <= st_CALC;
+                enab_max_min <= '0';
+                enab_ext_int <= '1';
+                enab_pow <= '0';
+					 enab_stat <= '0';
+                states_out <= "000010";
+					 next_state <= st_CALC;
+
 
             when st_CALC =>
-                if h = '1' then
+                enab_pow <= '1';
+					 enab_ext_int <= '0';
+					 enab_stat <= '0';
+                states_out <= "000100";
+					 
+					 if h = '1' then
                     next_state <= st_HEATING;
                 elsif c = '1' then
                     next_state <= st_COOLING;
@@ -69,58 +93,35 @@ begin
                     next_state <= st_CALC; 
                 end if;
 
-           when st_HEATING =>
-                if control = '0' then next_state <= st_RESET; 
+            when st_HEATING => 
+					 states_out <= "001000"; 
+                enab_stat <= '1';
+					 enab_pow <= '0';
+					 
+					 if control = '0' then next_state <= st_RESET; 
                 else                  next_state <= st_RINTEXT;
                 end if;
 
-            when st_COOLING =>
-                if control = '0' then next_state <= st_RESET;
+            when st_COOLING => 
+					 states_out <= "010000";
+                enab_stat <= '1';
+					 enab_pow <= '0';
+					 
+					 if control = '0' then next_state <= st_RESET;
                 else                  next_state <= st_RINTEXT;
                 end if;
 
-            when st_STABLE =>
-                if control = '0' then next_state <= st_RESET;
+            when st_STABLE  => 
+					 states_out <= "100000";
+                enab_stat <= '1';
+					 enab_pow <= '0';
+					 
+					 if control = '0' then next_state <= st_RESET;
                 else                  next_state <= st_RINTEXT;
                 end if;
-                
-            when others =>
-                next_state <= st_RESET;
-        end case;
-    end process;
-
-    output_proc: process(present_state)
-    begin
-	            enab_max_min   <= '0';
-                enab_ext_int   <= '0';
-                enab_pow   <= '0';
-                states_out <= "0000000";
-
-        case present_state is
-            when st_RESET =>
-                enab_max_min   <= '1';
-                enab_ext_int   <= '0';
-                enab_pow   <= '0';
-                states_out <= "0000001";
-                
-            when st_RINTEXT =>
-                enab_max_min <= '0';
-                enab_ext_int <= '1';
-                enab_pow <= '0';
-                states_out <= "0000010";
-
-            when st_CALC =>
-                enab_pow <= '1';
-                states_out <= "0000100";
-
-            when st_HEATING => states_out <= "0001000"; 
-
-            when st_COOLING => states_out <= "0010000";
-
-            when st_STABLE  => states_out <= "0100000";
 
             when others =>
-                null;
+					next_state <= st_RESET;
         end case;
     end process;
 
